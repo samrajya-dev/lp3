@@ -1,16 +1,20 @@
-<b></b>
-<div style="padding-left: 50px;">
-    <pre>
-        <code>
-        </code>
-    </pre>
+<style type="text/css">#link a{color:black;text-decoration: none;}#link a:hover{color: blue;text-decoration: underline;}</style>
+
+<div style="padding-left: 50px;"><br><br><button onclick="history.back()">Go Back</button><br><br><b>Design and Analysis of Algorithms</b>
+
+<ol id="link">
+    <li><a href="#1">Write a program non-recursive and recursive program to calculate Fibonacci numbers and analyze their time and space complexity.</a></li>
+    <li><a href="#2">Write a program to implement Huffman Encoding using a greedy strategy.</a></li>
+    <li><a href="#3">Write a program to solve a fractional Knapsack problem using a greedy method.</a></li>
+    <li><a href="#4">Write a program to solve a 0-1 Knapsack problem using dynamic programming or branch and bound strategy.</a></li>
+    <li><a href="#5">Design n-Queens matrix having first Queen placed. Use backtracking to place remaining Queens to generate the final n-queen‘s matrix.</a></li>
+    <li><a href="#6">Write a program for analysis of quick sort by using deterministic and randomized variant.</a></li>
+</ol>
 </div>
 
-
-<h2>DAA</h2>
 <div style="padding-left: 50px;">
 
-<b>1. Write a program non-recursive and recursive program to calculate Fibonacci numbers and analyze their time and space complexity.</b>
+<b id="1">1. Write a program non-recursive and recursive program to calculate Fibonacci numbers and analyze their time and space complexity.</b>
 <div style="padding-left: 50px;">
 <pre>
     <code>
@@ -84,7 +88,7 @@ Enter number of terms:4 Fibonacci sequence:
 
 
 
-<b>A2. Write a program to implement Huffman Encoding using a greedy strategy.</b>
+<b id="2">A2. Write a program to implement Huffman Encoding using a greedy strategy.</b>
 <div style="padding-left: 50px;">
     <pre>
         <code>
@@ -162,7 +166,7 @@ g -> 11
 
 
 
-<b>A3. Write a program to solve a fractional Knapsack problem using a greedy method.</b>
+<b id="3">A3. Write a program to solve a fractional Knapsack problem using a greedy method.</b>
 <div style="padding-left: 50px;">
     <pre>
         <code>
@@ -218,15 +222,184 @@ The fractions in which the items should be taken: [1, 0.5, 0]
 </div>
 
 
+<b id="4">A4. Write a program to solve a 0-1 Knapsack problem using dynamic programming or branch and bound strategy.</b>
+<div style="padding-left: 50px;">
+    <pre>
+        <code>
+
+            def knapSack(W, wt, val): 
+                n=len(val)
+                table = [[0 for x in range(W + 1)] for x in range(n + 1)] 
+             
+                for i in range(n + 1): 
+                    for j in range(W + 1): 
+                        if i == 0 or j == 0: 
+                            table[i][j] = 0
+                        elif wt[i-1] <= j: 
+                            table[i][j] = max(val[i-1]  
+            + table[i-1][j-wt[i-1]],  table[i-1][j]) 
+                        else: 
+                            table[i][j] = table[i-1][j] 
+               
+                return table[n][W] 
+             
+            val = [50,100,150,200]
+            wt = [8,16,32,40]
+            W = 64
+             
+            print(knapSack(W, wt, val))
+
+        <b>output :</b>
+        350
+
+        </code>
+    </pre>
+</div>
 
 
 
+<b id="5">A5. Design n-Queens matrix having first Queen placed. Use backtracking to place remaining Queens to generate the final n-queen‘s matrix.</b>
+<div style="padding-left: 50px;">
+    <pre>
+        <code>
+
+            # N Queen Problem using backtracking
+            
+            global N
+            N = 4
+
+            def printSolution(board):
+                for i in range(N):
+                    for j in range(N):
+                        print(board[i][j], end = " ")
+                    print()
+
+            # A utility function to check if a queen can
+            # be placed on board[row][col]. Note that this
+            # function is called when "col" queens are
+            # already placed in columns from 0 to col -1.
+            # So we need to check only left side for
+            # attacking queens
+            def isSafe(board, row, col):
+
+                # Check this row on left side
+                for i in range(col):
+                    if board[row][i] == 1:
+                        return False
+
+                # Check upper diagonal on left side
+                for i, j in zip(range(row, -1, -1),
+                                range(col, -1, -1)):
+                    if board[i][j] == 1:
+                        return False
+
+                # Check lower diagonal on left side
+                for i, j in zip(range(row, N, 1),
+                                range(col, -1, -1)):
+                    if board[i][j] == 1:
+                        return False
+
+                return True
+
+            def solveNQUtil(board, col):
+                
+                # base case: If all queens are placed
+                # then return true
+                if col >= N:
+                    return True
+
+                # Consider this column and try placing
+                # this queen in all rows one by one
+                for i in range(N):
+
+                    if isSafe(board, i, col):
+                        
+                        # Place this queen in board[i][col]
+                        board[i][col] = 1
+
+                        # recur to place rest of the queens
+                        if solveNQUtil(board, col + 1) == True:
+                            return True
+
+                        # If placing queen in board[i][col
+                        # doesn't lead to a solution, then
+                        # queen from board[i][col]
+                        board[i][col] = 0
+
+                # if the queen can not be placed in any row in
+                # this column col then return false
+                return False
+
+            # This function solves the N Queen problem using
+            # Backtracking. It mainly uses solveNQUtil() to
+            # solve the problem. It returns false if queens
+            # cannot be placed, otherwise return true and
+            # placement of queens in the form of 1s.
+            # note that there may be more than one
+            # solutions, this function prints one of the
+            # feasible solutions.
+            def solveNQ():
+                board = [ [0, 0, 0, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0],
+                        [0, 0, 0, 0] ]
+
+                if solveNQUtil(board, 0) == False:
+                    print ("Solution does not exist")
+                    return False
+
+                printSolution(board)
+                return True
+
+            # Driver Code
+            solveNQ()
+
+
+        <b>Output</b>
+         0  0  1  0 
+         1  0  0  0 
+         0  0  0  1 
+         0  1  0  0 
+
+        </code>
+    </pre>
+</div>
 
 
 
+<b id="6">A6. Write a program for analysis of quick sort by using deterministic and randomized variant.</b>
+<div style="padding-left: 50px;">
+    <pre>
+        <code>
+            <a href="https://people.engr.tamu.edu/andreas-klappenecker/csce411-s15/csce411-random3.pdf" target="_blank">ppt theory link</a> 
+            
+            
+            Algorithm For Deterministic QuickSort
+            
+            1: function QuickSort(L[1...n])
+            2:    if n ≤ c then
+            3:       BubbleSort(L)
+            4:       return L
+            5:    else
+            6:       p ←index chosen arbitrarily from [1...n]
+            7:       L1, L2 ← ∅
+            8:       for i ← 1 to n do
+            9:           if L[i] < L[p] then
+            10:              L1 ← L1 · L[i]
+            11:          else if L[i] > L[p] then
+            12:              L2 ← L2 · L[i]
+            13:          end if
+            14:      end for
+            15:      QuickSort(L1)
+            16:      QuickSort(L2)
+            17:      return L1 · L[p] · L2
+            18:   end if
+            19: end function
 
 
-
+        </code>
+    </pre>
+</div>
 
 
 
