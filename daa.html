@@ -1,0 +1,233 @@
+<b></b>
+<div style="padding-left: 50px;">
+    <pre>
+        <code>
+        </code>
+    </pre>
+</div>
+
+
+<h2>DAA</h2>
+<div style="padding-left: 50px;">
+
+<b>1. Write a program non-recursive and recursive program to calculate Fibonacci numbers and analyze their time and space complexity.</b>
+<div style="padding-left: 50px;">
+<pre>
+    <code>
+
+# Program to display the Fibonacci sequence up to n-th term
+
+# change this value for a different result
+nterms = 10
+
+nterms = int(input("Enter number of terms "))
+
+# first two terms
+n1 = 0
+n2 = 1
+count = 0
+
+# check if the number of terms is valid
+if nterms <= 0:
+   print("Please enter a positive integer")
+elif nterms == 1:
+   print("Fibonacci sequence upto",nterms,":")
+   print(n1)
+else:
+   print("Fibonacci sequence upto",nterms,":")
+   while count < nterms:
+       print(n1,end=' , ')
+       nth = n1 + n2
+       # update values
+       n1 = n2
+       n2 = nth
+       count += 1
+Output
+
+Fibonacci sequence upto 10 :
+0, 1, 1, 2, 3, 5, 8, 13, 21, 34,.....
+
+
+
+    </code>
+</pre>
+
+
+
+
+<b>Recursive Program</b>
+
+<pre>
+    <code>
+def fibonacci(n):
+    if(n <= 1):
+    return n
+    else:
+    return(fibonacci(n-1) + fibonacci(n-2))
+n = int(input("Enter number of terms:"))
+print("Fibonacci sequence:")
+for i in range(n):
+    print(fibonacci(i))
+
+<b>Output</b>
+Enter number of terms:4 Fibonacci sequence: 
+0 
+1 
+1 
+2
+
+
+
+    </code>
+</pre>
+</div>
+
+
+
+<b>A2. Write a program to implement Huffman Encoding using a greedy strategy.</b>
+<div style="padding-left: 50px;">
+    <pre>
+        <code>
+
+
+
+def printNodes(node, val=''):
+    newVal = val + str(node.huff)
+    if(node.left):
+        printNodes(node.left, newVal)
+    if(node.right):
+        printNodes(node.right, newVal)
+    if(not node.left and not node.right):
+        print(f"{node.symbol} -> {newVal}")
+
+# characters for huffman tree
+
+chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+
+# frequency of characters
+
+freq = [ 4, 7, 12, 14, 17, 43, 54]
+
+# list containing unused nodes
+
+nodes = []
+
+# converting characters and frequencies into huffman tree nodes
+
+for x in range(len(chars)):
+nodes.append(node(freq[x], chars[x]))
+while len(nodes) > 1:
+
+# sort all the nodes in ascending order based on their frequency
+
+nodes = sorted(nodes, key=lambda x: x.freq)
+
+# pick 2 smallest nodes
+
+left = nodes[0]
+right = nodes[1]
+
+# assign directional value to these nodes
+
+left.huff = 0
+right.huff = 1
+
+# combine the 2 smallest nodes to create new node as their parent
+
+newNode = node(left.freq+right.freq, left.symbol+right.symbol, left, right)
+
+# remove the 2 nodes and add their parent as new node among others
+
+nodes.remove(left)
+nodes.remove(right)
+ des.append(newNode)
+
+# Huffman Tree is ready!
+
+printNodes(nodes[0])
+
+<b>Output</b>
+a -> 0000 b -> 0001 c -> 001 
+d -> 010 
+e -> 011 
+f -> 10 
+g -> 11
+
+
+
+
+        </code>
+    </pre>
+</div>
+
+
+
+<b>A3. Write a program to solve a fractional Knapsack problem using a greedy method.</b>
+<div style="padding-left: 50px;">
+    <pre>
+        <code>
+
+
+
+def fractional_knapsack(value, weight, capacity):
+    # index = [0, 1, 2, ..., n - 1] for n items
+    index = list(range(len(value)))
+    # contains ratios of values to weight
+    ratio = [v/w for v, w in zip(value, weight)]
+    # index is sorted according to value-to-weight ratio in decreasing order
+    index.sort(key=lambda i: ratio[i], reverse=True)
+    max_value = 0
+    fractions = [0]*len(value)
+for i in index:
+    if weight[i] <= capacity:
+        fractions[i] = 1
+        max_value += value[i]
+        capacity -= weight[i]
+    else:
+        fractions[i] = capacity/weight[i]
+        max_value += value[i]*capacity/weight[i]
+        break
+    return max_value, fractions
+n = int(input('Enter number of items: '))
+value = input('Enter the values of the {} item(s) in order: '.format(n)).split()
+value = [int(v) for v in value]
+weight = input('Enter the positive weights of the {} item(s) in order: '.format(n)).split()
+weight = [int(w) for w in weight]
+capacity = int(input('Enter maximum weight: '))
+
+max_value, fractions = fractional_knapsack(value, weight, capacity)
+print('The maximum value of items that can be carried:', max_value)
+print('The fractions in which the items should be taken:', fractions)
+
+<b>Output</b>
+Enter number of items: 3 
+Enter the values of the 3 item(s) in order: 24 15 25 
+Enter the positive weights of the 3 item(s) in order: 15 10 18 Enter maximum weight: 20 
+The maximum value of items that can be carried: 31.5 
+The fractions in which the items should be taken: [1, 0.5, 0] 
+
+
+
+
+
+
+
+
+        </code>
+    </pre>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
