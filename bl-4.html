@@ -1,0 +1,87 @@
+<div style="padding-left: 50px;">
+	<br><br>
+	<button onclick="history.back()">Go Back</button>
+	<br><br>
+	<b>4. Write a program in solidity to create Student data. Use the following constructs:<br>
+	Structures<br>
+	Arrays<br>
+	Fallback<br>
+	Deploy this as smart contract on Ethereum and Observe the transaction fee and Gas values.</b>
+</div>
+
+
+<pre><code>
+	<b>What are Smart Contracts?</b>
+
+	Solidity’s code is encapsulated in contracts which means a contract in Solidity is a collection of code (its functions) and data (its state) 
+	that resides at a specific address on the Ethereum blockchain. A contract is a fundamental block of building an application on Ethereum. 
+
+	Implementation
+	Step 1: Open <a href="https://remix.ethereum.org/" target="_blank">Remix IDE.</a>
+	Step 2: Click on File Explorers and select Solidity in the environment and create a new file <b>StudentData.sol</b> by clicking on New File section.
+	Step 3: Build a smart contract that contains all the details of the student with the help of Remix IDE by clicking on the file name.
+
+
+			// SPDX-Licence-Identifier: GPL-3.0
+			pragma solidity ^0.8.1;
+
+			// Build the Contract
+			contract MarksManagmtSys
+			{
+				// Create a structure for
+				// student details
+				struct Student
+				{
+					int ID;
+					string fName;
+					string lName;
+					int marks;
+				}
+
+				address owner;
+				int public stdCount = 0;
+				mapping(int => Student) public stdRecords;
+
+				modifier onlyOwner
+				{
+					require(owner == msg.sender);
+					_;
+				}
+				constructor()
+				{
+					owner=msg.sender;
+				}
+
+				// Create a function to add
+				// the new records
+				function addNewRecords(int _ID, string memory _fName, string memory _lName, int _marks) 
+
+				public onlyOwner
+				{
+					// Increase the count by 1
+					stdCount = stdCount + 1;
+
+					// Fetch the student details
+					// with the help of stdCount
+					stdRecords[stdCount] = Student(_ID, _fName, _lName, _marks);
+				}
+
+				// Create a function to add bonus marks
+				function bonusMarks(int _bonus) public onlyOwner
+				{
+					stdRecords[stdCount].marks =
+								stdRecords[stdCount].marks + _bonus;
+				}
+			}
+
+
+
+
+
+
+	Step 4: After building the contract compile it.
+	Step 5: After successful compilation, to deploy the contract click on the Deploy button.
+	Step 6: If the contract is successfully deployed then deployed contract is obtained. Open the deployed contract and add the student details and transact it.
+        </code>
+    </pre>
+</div>

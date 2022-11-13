@@ -1,0 +1,69 @@
+<div style="padding-left: 50px;">
+	<br><br>
+	<button onclick="history.back()">Go Back</button>
+	<br><br>
+	<b>
+			3. Write a smart contract on a test network, for Bank account of a customer for following operations:<br>
+			Deposit money<br>
+			Withdraw Money<br>
+			Show balance
+	</b>
+</div>
+
+
+<pre><code>
+
+	Implementation
+	Step 1: Open <a href="https://remix.ethereum.org/" target="_blank">Remix IDE.</a>
+	Step 2: Click on File Explorers and select Solidity in the environment and create a new file <b>bank.sol</b> by clicking on New File section.
+	Step 3: Build a smart contract that contains all the details of the student with the help of Remix IDE by clicking on the file name.
+
+
+		//SPDX-License-Identifier: MIT 
+
+		pragma solidity ^0.8.0;
+
+		//i created a smart contract that allows a user to deposit, withdraw and save ETH!!
+
+		contract SmartSHop{
+		    //we mapped the address of the caller balance in the contract
+		    mapping(address => uint) public balances;
+
+		// whatever the user deposit is added to msg.value of the sender address we mapped above
+		    function deposit() public payable{
+		        balances[msg.sender] += msg.value; 
+		    }
+		    
+		//we create the fucntion of witdraw 
+		    function withdraw(uint _amount) public{
+		        //we create a require arg to make sure the balance of the sender is >= _amount if not ERR
+		        require(balances[msg.sender]>= _amount, "Not enough ether");
+		        //if the amount is availabe we subtract it from the sender 
+		        balances[msg.sender] -= _amount;
+		        //True bool is called to confirm the amount
+		        (bool sent,) = msg.sender.call{value: _amount}("Sent");
+		        require(sent, "failed to send ETH");
+
+		        
+		    }
+
+		    function getBal() public view returns(uint){
+		        return address(this).balance;
+		    }
+
+
+
+
+		}
+
+
+
+
+
+
+	Step 4: After building the contract compile it.
+	Step 5: After successful compilation, to deploy the contract click on the Deploy button.
+	Step 6: If the contract is successfully deployed then deployed contract is obtained. Open the deployed contract and add the student details and transact it.
+        </code>
+    </pre>
+</div>
