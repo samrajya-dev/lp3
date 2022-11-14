@@ -1,0 +1,81 @@
+<style type="text/css">#link a{color:black;text-decoration: none;}#link a:hover{color: blue;text-decoration: underline;}
+.codebox{outline: solid #000;}
+</style>
+
+<div style="padding-left: 50px;"><br><br><button onclick="history.back()">Go Back</button><br><br>
+	2.
+	Classify the email using the binary classification method. Email Spam detection has two
+states: <br>a) Normal State – Not Spam <br>b) Abnormal State – Spam.<br> Use K-Nearest Neighbors and
+Support Vector Machine for classification. Analyze their performance.
+Dataset link: The emails.csv dataset on the Kaggle
+https://www.kaggle.com/datasets/balaka18/email-spam-classification-dataset-csv
+
+<br>
+<b>Download and import</b>
+<a href="EmailSpamDetection.ipynb">Email Spam Detection</a>
+
+</div>
+
+<pre>
+	<code>
+		<b>1. Data Exploration</b>
+<div class="codebox">
+	#Importing the basic librarires
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from IPython.display import display
+
+import matplotlib.pyplot as plt
+plt.rcParams['figure.figsize'] = [10,6]
+
+import warnings 
+warnings.filterwarnings('ignore')
+</div>
+<div class="codebox">
+	#Importing the dataset
+
+df = pd.read_csv('Spam.csv')
+df.reset_index(drop=True, inplace=True)
+original_df = df.copy(deep=True)
+display(df.head())
+
+print('\n\033[1mInference:\033[0m The Datset consists of {} features & {} samples.'.format(df.shape[1], df.shape[0]))
+</div>
+<div class="codebox">
+#Checking the dtypes of all the columns
+
+df.info()
+</div>
+<div class="codebox">
+#Checking the stats of all the columns
+
+display(df.describe())
+</div>
+
+
+<b>K-Nearest Neighbours Classfier:</b>
+<div class="codebox">
+	from sklearn.neighbors import KNeighborsClassifier
+
+KNN = KNeighborsClassifier().fit(Train_X_std_pca, Train_Y)
+pred = KNN.predict(Test_X_std_pca)
+pred_prob = KNN.predict_proba(Test_X_std_pca)
+Classification_Summary(pred,pred_prob,5)
+</div>
+
+
+<b>Support Vector Machine Classfier:</b>
+<div class="codebox">
+from sklearn.svm import SVC
+SVM = SVC(probability=True).fit(Train_X_std_pca, Train_Y)
+pred = SVM.predict(Test_X_std_pca)
+pred_prob = SVM.predict_proba(Test_X_std_pca)
+Classification_Summary(pred,pred_prob,4)
+</div>
+
+
+
+	</code>
+</pre>
