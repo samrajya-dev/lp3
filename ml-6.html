@@ -1,0 +1,114 @@
+<style type="text/css">#link a{color:black;text-decoration: none;}#link a:hover{color: blue;text-decoration: underline;}
+.codebox{outline: solid #000;}
+</style>
+
+<div style="padding-left: 50px;"><br><br><button onclick="history.back()">Go Back</button><br><br>
+	6.
+	Implement K-Nearest Neighbors algorithm on diabetes.csv dataset. Compute confusion<br>
+matrix, accuracy, error rate, precision and recall on the given dataset.<br>
+Dataset link : https://www.kaggle.com/datasets/abdallamahgoub/diabetes
+
+<br>
+<b>Download and import</b>
+<a href="BigMartSalesPrediction.ipynb">BigMart Sales Prediction</a>
+<b>Download CSV File</b>
+<a href="bigmart.csv">bigmart csv</a>
+
+</div>
+
+<pre>
+	<code>
+		<b>1. Data Exploration</b>
+		
+<div class="codebox">
+#Importing the basic librarires
+
+import math
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from IPython.display import display
+
+from statsmodels.formula import api
+from sklearn.feature_selection import RFE
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+from sklearn.decomposition import PCA
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+
+import matplotlib.pyplot as plt
+plt.rcParams['figure.figsize'] = [10,6]
+
+import warnings 
+warnings.filterwarnings('ignore')
+</div>
+<div class="codebox">
+#Importing the dataset
+
+df = pd.read_csv('bigmart.csv')
+
+display(df.head())
+df.drop(['Item_Identifier'], axis=1, inplace=True)
+
+target = 'Item_Outlet_Sales'
+features = [i for i in df.columns if i not in [target]]
+
+original_df = df.copy(deep=True)
+
+print('\n\033[1mInference:\033[0m The Datset consists of {} features & {} samples.'.format(df.shape[1], df.shape[0]))</div>
+<div class="codebox">
+#Checking the dtypes of all the columns
+
+df.info(),
+</div>
+<div class="codebox">
+#Checking number of unique rows in each feature
+
+df.nunique().sort_values()</div>
+<div class="codebox">
+#Checking number of unique rows in each feature
+
+nu = df[features].nunique().sort_values()
+nf = []; cf = []; nnf = 0; ncf = 0; #numerical & categorical features
+
+for i in range(df[features].shape[1]):
+    if nu.values[i]<=16:cf.append(nu.index[i])
+    else: nf.append(nu.index[i])
+
+print('\n\033[1mInference:\033[0m The Datset has {} numerical & {} categorical features.'.format(len(nf),len(cf)))</div>
+
+<b>2. Exploratory Data Analysis (EDA)</b>
+<div class="codebox">
+#Let us first analyze the distribution of the target variable
+
+plt.figure(figsize=[8,4])
+sns.distplot(df[target], color='g',hist_kws=dict(edgecolor="black", linewidth=2), bins=30)
+plt.title('Target Variable Distribution - Median Value of Homes ($1Ms)')
+plt.show()
+</div>
+<b>3. Data Preprocessing</b>
+<div class="codebox">
+#Removal of any Duplicate rows (if any)
+
+counter = 0
+rs,cs = original_df.shape
+
+df.drop_duplicates(inplace=True)
+
+if df.shape==(rs,cs):
+    print('\n\033[1mInference:\033[0m The dataset doesn\'t have any duplicates')
+else:
+    print(f'\n\033[1mInference:\033[0m Number of duplicates dropped/fixed ---> {rs-df.shape[0]}')
+</div>
+
+
+	</code>
+</pre>
