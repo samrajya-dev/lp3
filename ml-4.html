@@ -1,0 +1,188 @@
+<style type="text/css">#link a{color:black;text-decoration: none;}#link a:hover{color: blue;text-decoration: underline;}
+.codebox{outline: solid #000;}
+</style>
+
+<div style="padding-left: 50px;"><br><br><button onclick="history.back()">Go Back</button><br><br>
+	4.
+	Implement K-Nearest Neighbors algorithm on diabetes.csv dataset. <br>
+	Compute confusion matrix, accuracy, error rate, precision and recall on the given dataset.<br>
+Dataset link : https://www.kaggle.com/datasets/abdallamahgoub/diabetes
+
+<br>
+<b>Download and import</b>
+<a href="PimaIndiansDiabetesDetection.ipynb">Pima Indians Diabetes Detection</a>
+<b>Download and csv file</b>
+<a href="diabetes.csv">diabetes csv</a>
+
+</div>
+
+<pre>
+	<code>
+		<b>1. Data Exploration</b>
+		
+		<div class="codebox">
+#Importing the basic librarires
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from IPython.display import display
+
+import matplotlib.pyplot as plt
+plt.rcParams['figure.figsize'] = [10,6]
+
+import warnings 
+warnings.filterwarnings('ignore')
+		</div>
+		<div class="codebox">
+#Importing the dataset
+
+df = pd.read_csv('pima-indians-diabetes.csv')
+df.reset_index(drop=True, inplace=True)
+original_dataset = df.copy(deep=True)
+display(df.head())
+
+print('\n\033[1mInference:\033[0m The Datset consists of {} features & {} samples.'.format(df.shape[1], df.shape[0]))
+		</div>
+		<div class="codebox">
+#Checking the dtypes of all the columns
+
+df.info()
+</div>
+			<div class="codebox">
+#Checking the stats of all the columns
+
+display(df.describe())
+print('\n \033[1mInference:\033[0m The stats seem to be unrealistic for few samples, \
+let us visualize the dataset to gain better understanding...')
+</div>
+				<div class="codebox">
+#Let us first analyze the distribution of the target variable
+
+print('\033[1mTarget Variable Distribution'.center(55))
+plt.pie(df.Outcome.value_counts(), labels=['Diabetic','Non-Diabetic'], counterclock=False, shadow=True, 
+        explode=[0,0.1], autopct='%1.1f%%', radius=1)
+plt.show()
+
+print('\n\033[1mInference:\033[0m The Target Variable seems to be slightly imbalanced! We can try to fix this later on...')
+</div>
+
+					<div class="codebox">
+#Understanding the feature set
+
+print('\033[1mFeatures Distribution'.center(130))
+
+plt.figure(figsize=[15,5])
+for c in range(8):
+    plt.subplot(2,4,c+1)
+    sns.distplot(df[df.columns[c]])
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=[15,5])
+for c in range(8):
+    plt.subplot(2,4,c+1)
+    df.boxplot(df.columns[c])
+plt.tight_layout()
+plt.show()
+
+print('\n\033[1mInference:\033[0m The data distribution revealed the multiple samples are inaccurate, like glucose, \
+bloodpressure, BMI, which are not supposed to be zero. We shall try to fix these in the upcoming cleanup stage...')
+</div>
+
+						<div class="codebox">
+#Understanding the relationship between all the features
+
+df1 = df.copy()
+df1.Outcome = df.Outcome.map({0:'Non-Diabetic',1:'Diabetic'})
+
+g=sns.pairplot(df1, hue="Outcome")
+g.map_upper(sns.kdeplot, levels=4, color=".2")
+plt.show()
+
+print('\n\033[1mInference:\033[0m The data samples of most of the features don\'t show an exact pattern. Also they seem\
+to have lot of overlap for the outcome classes, making it difficult to be distingusihable.')
+
+</div>
+
+<b>3. Data Preprocessing</b>
+
+							<div class="codebox">
+
+#Check for empty elements
+
+print(df.isnull().sum())
+print('\n\033[1mInference:\033[0m The dataset doesn\'t have any null elements')
+</div>
+
+
+<div class="codebox">
+#Removal of any Duplicate rows (if any)
+
+counter = 0
+r,c = df1.shape
+
+df.drop_duplicates(inplace=True)
+
+if df.shape==(r,c):
+    print('\n\033[1mInference:\033[0m The dataset doesn\'t have any duplicates')
+else:
+    print(f'\n\033[1mInference:\033[0m Number of duplicates dropped/fixed ---> {r-df.shape[0]}')
+</div>
+
+<div class="codebox">
+xf = df.columns.to_list()
+xf.remove('Outcome')
+xf
+</div>
+<div class="codebox">
+#Removal of outlier:
+
+for i in df.columns:
+    Q1 = df[i].quantile(0.25)
+    Q3 = df[i].quantile(0.75)
+    IQR = Q3 - Q1
+    df = df[df[i] <= (Q3+(1.5*IQR))]
+    df = df[df[i] >= (Q1-(1.5*IQR))]
+    df = df.reset_index(drop=True)
+display(df)
+df2 = df.copy()
+print('\n\033[1mInference:\033[0m After removal of outliers, The dataset now has {} features & {} samples.'.format(df.shape[1], df.shape[0]))
+</div>
+
+
+<div class="codebox">
+#Fixing the imbalance using SMOTE Technique
+from imblearn.over_sampling import SMOTE
+
+print('Original class distribution:')
+print(df.Outcome.value_counts())
+
+X = df.drop(['Outcome'],axis=1)
+Y = df.Outcome
+
+smote = SMOTE()
+X, Y = smote.fit_resample(X, Y)
+
+df3 = pd.DataFrame(X, columns=xf)
+df3['Outcome'] = Y
+df = df3.copy()
+
+print('\nClass distribution after applying SMOTE Technique:',)
+print(Y.value_counts())
+</div>
+
+<b>6. Predictive Modeling</b>
+
+<div class="codebox">
+#Let us create first create a table to store the results of various models 
+
+Evaluation_Results = pd.DataFrame(np.zeros((8,5)), columns=['Accuracy', 'Precision','Recall','F1-score','AUC-ROC score'])
+Evaluation_Results.index=['Logistic Regression (LR)','Decision Tree Classifier (DT)','Random Forest Classifier (RF)','Naïve Bayes Classifier (NB)',
+                         'Support Vector Machine (SV)','K Nearest Neighbours (KNN)', 'Gradient Boosting (GB)','Extreme Gradient Boosting (XGB)']
+Evaluation_Results
+</div>
+
+
+	</code>
+</pre>
