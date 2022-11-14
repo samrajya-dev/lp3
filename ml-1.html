@@ -1,0 +1,229 @@
+<style type="text/css">#link a{color:black;text-decoration: none;}#link a:hover{color: blue;text-decoration: underline;}
+.codebox{outline: solid #000;}
+</style>
+
+<div style="padding-left: 50px;"><br><br><button onclick="history.back()">Go Back</button><br><br>
+	1.
+	Predict the price of the Uber ride from a given pickup point to the agreed drop-off location.<br>
+Perform following tasks:<br>
+1. Pre-process the dataset.<br>
+2. Identify outliers.<br>
+3. Check the correlation.<br>
+4. Implement linear regression and random forest regression models.<br>
+5. Evaluate the models and compare their respective scores like R2, RMSE, etc.<br>
+Dataset link: https://www.kaggle.com/datasets/yasserh/uber-fares-dataset
+
+<br>
+<b>Download and import</b>
+<a href="UberFarePrediction.ipynb">Uber Fare Prediction</a>
+
+</div>
+
+<pre>
+	<code>
+		<b>1. Data Exploration</b>
+		
+		<div class="codebox">
+#Importing the basic librarires
+import math
+import geopy
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import datetime as dt
+from tqdm import tqdm
+from IPython.display import display
+
+from brokenaxes import brokenaxes
+from statsmodels.formula import api
+from sklearn.feature_selection import RFE
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+from sklearn.decomposition import PCA
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+
+import matplotlib.pyplot as plt
+plt.rcParams['figure.figsize'] = [10,6]
+
+import warnings 
+warnings.filterwarnings('ignore')
+
+		</div>
+		<div class="codebox">
+#Importing the dataset
+
+df = pd.read_csv('uber.csv')
+
+df.drop(['Unnamed: 0','key'], axis=1, inplace=True)
+display(df.head())
+
+target = 'fare_amount'
+features = [i for i in df.columns if i not in [target]]
+
+print('\n\033[1mInference:\033[0m The Datset consists of {} features & {} samples.'.format(df.shape[1], df.shape[0]))
+		</div>
+		<div class="codebox">
+#Check for empty elements
+
+nvc = pd.DataFrame(df.isnull().sum().sort_values(), columns=['Total Null Values'])
+nvc['Percentage'] = round(nvc['Total Null Values']/df.shape[0],3)*100
+print(nvc)
+df.dropna(inplace=True)
+</div>
+			<div class="codebox">
+# Reframing the columns
+
+df = df[(df.pickup_latitude<90) & (df.dropoff_latitude<90) &
+        (df.pickup_latitude>-90) & (df.dropoff_latitude>-90) &
+        (df.pickup_longitude<180) & (df.dropoff_longitude<180) &
+        (df.pickup_longitude>-180) & (df.dropoff_longitude>-180)]
+df.pickup_datetime=pd.to_datetime(df.pickup_datetime)
+
+df['year'] = df.pickup_datetime.dt.year
+df['month'] = df.pickup_datetime.dt.month
+df['weekday'] = df.pickup_datetime.dt.weekday
+df['hour'] = df.pickup_datetime.dt.hour
+
+df['Monthly_Quarter'] = df.month.map({1:'Q1',2:'Q1',3:'Q1',4:'Q2',5:'Q2',6:'Q2',7:'Q3',
+                                      8:'Q3',9:'Q3',10:'Q4',11:'Q4',12:'Q4'})
+df['Hourly_Segments'] = df.hour.map({0:'H1',1:'H1',2:'H1',3:'H1',4:'H2',5:'H2',6:'H2',7:'H2',8:'H3',
+                                     9:'H3',10:'H3',11:'H3',12:'H4',13:'H4',14:'H4',15:'H4',16:'H5',
+                                     17:'H5',18:'H5',19:'H5',20:'H6',21:'H6',22:'H6',23:'H6'})
+
+df['Distance']=[round(geopy.distance.distance((df.pickup_latitude[i], df.pickup_longitude[i]),(df.dropoff_latitude[i], df.dropoff_longitude[i])).m,2) for i in df.index]
+
+df.drop(['pickup_datetime','month', 'hour',], axis=1, inplace=True)
+
+original_df = df.copy(deep=True)
+
+df.head()
+</div>
+				<div class="codebox">
+
+#Checking the dtypes of all the columns
+
+df.info()
+</div>
+
+					<div class="codebox">
+
+#Checking number of unique rows in each feature
+
+df.nunique().sort_values()
+</div>
+
+						<div class="codebox">
+
+#Checking number of unique rows in each feature
+
+nu = df.drop([target], axis=1).nunique().sort_values()
+nf = []; cf = []; nnf = 0; ncf = 0; #numerical & categorical features
+
+for i in range(df.drop([target], axis=1).shape[1]):
+    if nu.values[i]<=24:cf.append(nu.index[i])
+    else: nf.append(nu.index[i])
+
+print('\n\033[1mInference:\033[0m The Datset has {} numerical & {} categorical features.'.format(len(nf),len(cf)))
+</div>
+
+							<div class="codebox">
+
+#Checking the stats of all the columns
+
+display(df.describe())
+</div>
+
+<b>2. Exploratory Data Analysis (EDA)</b>
+
+<div class="codebox">
+plt.figure(figsize=[15,10])
+a=plt.imread('wm.png')
+plt.imshow(a, alpha=0.2)
+plt.scatter( (df.pickup_longitude+180)*3,(df.pickup_latitude+215)*1.45555555,alpha=0.3, color='red')
+#mdf.plot(kind='scatter',x='pickup_latitude',y='pickup_longitude',alpha=0.1)
+plt.show()
+</div>
+
+<div class="codebox">
+	#Let us first analyze the distribution of the target variable
+
+plt.figure(figsize=[8,4])
+sns.distplot(df[target], color='g',hist_kws=dict(edgecolor="black", linewidth=2), bins=30)
+plt.title('Target Variable Distribution - Median Value of Homes ($1Ms)')
+plt.show()
+</div>
+<div class="codebox">
+	#Visualising the categorical features 
+
+print('\033[1mVisualising Categorical Features:'.center(100))
+
+n=2
+plt.figure(figsize=[15,3*math.ceil(len(cf)/n)])
+
+# for i in range(len(cf)):
+#     if df[cf[i]].nunique()<=4:
+#         plt.subplot(math.ceil(len(cf)/n),n,i+1)
+#         sns.countplot(df[cf[i]])
+#     else:
+#         plt.subplot(math.ceil(len(cf)/2),2,i)
+#         sns.countplot(df[cf[i]])
+
+for i in range(len(cf)):
+    if df[cf[i]].nunique()<=12:
+        plt.subplot(math.ceil(len(cf)/n),n,i+1)
+        sns.countplot(df[cf[i]])
+    else:
+        plt.subplot(3,1,i-3)
+        sns.countplot(df[cf[i]])
+        #plt.subplot(4,2,8)
+        #sns.countplot(df[cf[i]])
+        
+plt.tight_layout()
+plt.show()
+</div>
+
+<b>3. Data Preprocessing</b>
+
+<div class="codebox">
+#Removal of any Duplicate rows (if any)
+
+counter = 0
+rs,cs = original_df.shape
+
+df.drop_duplicates(inplace=True)
+df.drop(['pickup_latitude','pickup_longitude',
+         'dropoff_latitude','dropoff_longitude'],axis=1)
+
+if df.shape==(rs,cs):
+    print('\n\033[1mInference:\033[0m The dataset doesn\'t have any duplicates')
+else:
+    print(f'\n\033[1mInference:\033[0m Number of duplicates dropped/fixed ---> {rs-df.shape[0]}')
+</div>
+
+<b>4.Linear Regression(MLR)</b>
+
+<div class="codebox">
+#Linear Regression
+
+MLR = LinearRegression().fit(Train_X_std,Train_Y)
+pred1 = MLR.predict(Train_X_std)
+pred2 = MLR.predict(Test_X_std)
+
+print('{}{}\033[1m Evaluating Multiple Linear Regression Model \033[0m{}{}\n'.format('<'*3,'-'*25 ,'-'*25,'>'*3))
+print('The Coeffecient of the Regresion Model was found to be ',MLR.coef_)
+print('The Intercept of the Regresion Model was found to be ',MLR.intercept_)
+
+Evaluate(0, pred1, pred2)
+</div>
+
+
+	</code>
+</pre>
